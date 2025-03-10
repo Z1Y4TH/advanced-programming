@@ -227,26 +227,26 @@
                         <th>Destination</th>
                         <th>Booking Date</th>
                         <th>Status</th>
-                        <th>Car</th>
+                        <th>Assigned Car</th> <!-- Updated column name -->
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% for (Booking booking : bookings) { %>
+                    <% for (Booking booking : bookings) {%>
                     <tr>
-                        <td><%= booking.getBookingId() %></td>
-                        <td><%= booking.getCustomerName() %></td>
-                        <td><%= booking.getPhoneNumber() %></td>
-                        <td><%= booking.getPickupLocation() %></td>
-                        <td><%= booking.getDestination() %></td>
-                        <td><%= booking.getBookingDate() %></td>
-                        <td><%= booking.getStatus() %></td>
-                        <td><%= booking.getCarId() > 0 ? booking.getCarId() : "Not Assigned" %></td>
+                        <td><%= booking.getBookingId()%></td>
+                        <td><%= booking.getCustomerName()%></td>
+                        <td><%= booking.getPhoneNumber()%></td>
+                        <td><%= booking.getPickupLocation()%></td>
+                        <td><%= booking.getDestination()%></td>
+                        <td><%= booking.getBookingDate()%></td>
+                        <td><%= booking.getStatus()%></td>
+                        <td><%= booking.getCarModel() != null ? booking.getCarModel() : "Not Assigned"%></td>
                         <td>
-                            <button class="btn btn-update" onclick="openUpdateBookingModal(<%= booking.getBookingId() %>)">
+                            <button class="btn btn-update" onclick="openUpdateBookingModal(<%= booking.getBookingId()%>)">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
-                            <button class="btn btn-delete" onclick="deleteBooking(<%= booking.getBookingId() %>)">
+                            <button class="btn btn-delete" onclick="deleteBooking(<%= booking.getBookingId()%>)">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>

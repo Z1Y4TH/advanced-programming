@@ -11,6 +11,7 @@ public class Booking {
     private Timestamp bookingDate;
     private String status;
     private int carId;
+    private String carModel;
 
     // Getters and Setters
     public int getBookingId() {
@@ -77,4 +78,12 @@ public class Booking {
         this.carId = carId;
     }
     
+    public String getCarModel() {
+        return carModel;
+    } // Add getter
+
+    public void setCarModel(String carModel) {
+        this.carModel = carModel;
+    } // Add setter
+
 }

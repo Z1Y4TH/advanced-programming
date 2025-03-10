@@ -11,9 +11,13 @@ import java.sql.ResultSet;
 
 public class BookingDAO {
 
-    private static final String SELECT_ALL_BOOKINGS = "SELECT b.booking_id, c.name AS customer_name, c.phone_number, b.pickup_location, b.destination, b.booking_date, b.status " +
-            "FROM bookings b " +
-            "JOIN customers c ON b.customer_id = c.customer_id";
+    private static final String SELECT_ALL_BOOKINGS
+            = "SELECT b.booking_id, c.name AS customer_name, c.phone_number, "
+            + "b.pickup_location, b.destination, b.booking_date, b.status, "
+            + "car.model AS car_model "
+            + "FROM bookings b "
+            + "JOIN customers c ON b.customer_id = c.customer_id "
+            + "LEFT JOIN cars car ON b.car_id = car.car_id";
 
     private static final String SELECT_BOOKINGS_BY_PHONE = "SELECT b.booking_id, c.name AS customer_name, c.phone_number, b.pickup_location, b.destination, b.booking_date, b.status " +
             "FROM bookings b " +
@@ -66,31 +70,28 @@ public class BookingDAO {
 
     // Get all bookings
     public List<Booking> getAllBookings() {
-    List<Booking> bookings = new ArrayList<>();
-    String sql = "SELECT b.*, c.name AS customer_name, c.phone_number, car.model AS car_model " +
-                 "FROM bookings b " +
-                 "JOIN customers c ON b.customer_id = c.customer_id " +
-                 "LEFT JOIN cars car ON b.car_id = car.car_id";
-
-    try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            Booking booking = new Booking();
-            booking.setBookingId(rs.getInt("booking_id"));
-            booking.setCustomerName(rs.getString("customer_name"));
-            booking.setPhoneNumber(rs.getString("phone_number"));
-            booking.setPickupLocation(rs.getString("pickup_location"));
-            booking.setDestination(rs.getString("destination"));
-            booking.setBookingDate(rs.getTimestamp("booking_date"));
-            booking.setStatus(rs.getString("status"));
-            booking.setCarId(rs.getInt("car_id"));
-            bookings.add(booking);
+        List<Booking> bookings = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnection(); 
+             PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_BOOKINGS)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Booking booking = new Booking();
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setCustomerName(rs.getString("customer_name"));
+                booking.setPhoneNumber(rs.getString("phone_number"));
+                booking.setPickupLocation(rs.getString("pickup_location"));
+                booking.setDestination(rs.getString("destination"));
+                booking.setBookingDate(rs.getTimestamp("booking_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setCarModel(rs.getString("car_model")); // Set car model
+                bookings.add(booking);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return bookings;
     }
-    return bookings;
-}
+    
     // Get bookings by phone number
     public List<Booking> getBookingsByPhoneNumber(String phoneNumber) {
         List<Booking> bookings = new ArrayList<>();
