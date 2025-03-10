@@ -10,6 +10,7 @@ public class Booking {
     private String destination;
     private Timestamp bookingDate;
     private String status;
+    private int carId;
 
     // Getters and Setters
     public int getBookingId() {
@@ -67,4 +68,13 @@ public class Booking {
     public void setStatus(String status) {
         this.status = status;
     }
+    
+    public int getCarId() {
+        return carId;
+    }
+    
+    public void setCarId(int carId) {
+        this.carId = carId;
+    }
+    
 }

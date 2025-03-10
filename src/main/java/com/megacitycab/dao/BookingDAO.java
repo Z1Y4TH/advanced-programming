@@ -33,6 +33,22 @@ public class BookingDAO {
 
     private static final String SELECT_BOOKING_BY_CUSTOMER = "SELECT * FROM bookings WHERE booking_id = ? AND customer_id = ?";
 
+    private static final String UPDATE_BOOKING_WITH_CAR_AND_BILL = "UPDATE bookings SET car_id = ? WHERE booking_id = ?";
+    
+
+    public boolean updateBookingWithCarAndBill(int bookingId, int carId) {
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_BOOKING_WITH_CAR_AND_BILL)) {
+            stmt.setInt(1, carId);
+            stmt.setInt(2, bookingId);
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // Add a new booking
     public boolean addBooking(int customerId, String pickupLocation, String destination) {
         try (Connection conn = DBUtil.getConnection();
@@ -50,26 +66,31 @@ public class BookingDAO {
 
     // Get all bookings
     public List<Booking> getAllBookings() {
-        List<Booking> bookings = new ArrayList<>();
-        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_BOOKINGS)) {
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Booking booking = new Booking();
-                booking.setBookingId(rs.getInt("booking_id"));
-                booking.setCustomerName(rs.getString("customer_name"));
-                booking.setPhoneNumber(rs.getString("phone_number"));
-                booking.setPickupLocation(rs.getString("pickup_location"));
-                booking.setDestination(rs.getString("destination"));
-                booking.setBookingDate(rs.getTimestamp("booking_date"));
-                booking.setStatus(rs.getString("status"));
-                bookings.add(booking);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return bookings;
-    }
+    List<Booking> bookings = new ArrayList<>();
+    String sql = "SELECT b.*, c.name AS customer_name, c.phone_number, car.model AS car_model " +
+                 "FROM bookings b " +
+                 "JOIN customers c ON b.customer_id = c.customer_id " +
+                 "LEFT JOIN cars car ON b.car_id = car.car_id";
 
+    try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Booking booking = new Booking();
+            booking.setBookingId(rs.getInt("booking_id"));
+            booking.setCustomerName(rs.getString("customer_name"));
+            booking.setPhoneNumber(rs.getString("phone_number"));
+            booking.setPickupLocation(rs.getString("pickup_location"));
+            booking.setDestination(rs.getString("destination"));
+            booking.setBookingDate(rs.getTimestamp("booking_date"));
+            booking.setStatus(rs.getString("status"));
+            booking.setCarId(rs.getInt("car_id"));
+            bookings.add(booking);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return bookings;
+}
     // Get bookings by phone number
     public List<Booking> getBookingsByPhoneNumber(String phoneNumber) {
         List<Booking> bookings = new ArrayList<>();

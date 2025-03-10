@@ -22,6 +22,7 @@ com\megacitycab\controller\AddCarServlet.class
 com\megacitycab\controller\EditDriverServlet.class
 com\megacitycab\controller\DeleteDriverServlet.class
 com\megacitycab\controller\ValidateCustomerServlet.class
+com\megacitycab\controller\UpdateBookingWithCarAndBillServlet.class
 com\megacitycab\util\DBUtil.class
 com\megacitycab\resources\JakartaEE10Resource.class
 com\megacitycab\controller\LoginServlet.class

@@ -1,24 +1,26 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.megacitycab.dao.BookingDAO" %>
+<%@ page import="com.megacitycab.dao.CarDAO" %>
+<%@ page import="com.megacitycab.dao.BillDAO" %>
 <%@ page import="com.megacitycab.model.Booking" %>
+<%@ page import="com.megacitycab.model.Car" %>
+<%@ page import="com.megacitycab.model.Bill" %>
 <%@ page import="java.util.List" %>
 <%
-    // Check if the user is logged in (for dashboard access)
     if (session == null || session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp"); // Redirect to login page if not logged in
-        return; // Stop further execution
+        response.sendRedirect("login.jsp");
+        return;
     }
 
-    // Fetch all bookings
     BookingDAO bookingDAO = new BookingDAO();
     List<Booking> bookings = bookingDAO.getAllBookings();
+    CarDAO carDAO = new CarDAO();
+    List<Car> cars = carDAO.getAllCars();
 %>
 <html>
 <head>
     <title>Manage Bookings - Mega City Cab</title>
-    <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
@@ -181,6 +183,7 @@
             margin: 0;
             font-size: 14px;
         }
+
         .logout-btn {
             background-color: #dc3545;
             color: white;
@@ -197,60 +200,20 @@
             background-color: #c82333;
         }
     </style>
-    <script>
-        // Open/Close Update Booking Modal
-        function openUpdateBookingModal(bookingId, status) {
-            document.getElementById("updateBookingId").value = bookingId;
-            document.getElementById("updateStatus").value = status;
-            document.getElementById("updateBookingModal").style.display = "flex";
-        }
-        function closeUpdateBookingModal() {
-            document.getElementById("updateBookingModal").style.display = "none";
-        }
-
-        // Delete Booking
-        function deleteBooking(bookingId) {
-            if (confirm("Are you sure you want to delete this booking?")) {
-                fetch("deleteBooking?id=" + bookingId, { method: "POST" })
-                    .then(response => {
-                        if (response.ok) {
-                            location.reload(); // Reload the page to reflect changes
-                        } else {
-                            alert("Failed to delete booking.");
-                        }
-                    });
-            }
-        }
-    </script>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <a class="navbar-brand ml-auto" href="/MegaCityCab/">
-            Mega City Cab
-        </a>
+    <nav class="navbar">
+        <a class="navbar-brand ml-auto" href="/MegaCityCab/">Mega City Cab</a>
     </nav>
 
-    <!-- Sidebar -->
     <div class="sidebar">
-        <a href="dashboard.jsp">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-        </a>
-        <a href="manageBookings.jsp">
-            <i class="fas fa-calendar-alt"></i> Manage Bookings
-        </a>
-        <a href="manageDrivers.jsp">
-            <i class="fas fa-users"></i> Manage Drivers
-        </a>
-        <a href="manageCars.jsp">
-            <i class="fas fa-car"></i> Manage Cars
-        </a>
-        <a href="logout" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
+        <a href="dashboard.jsp">Dashboard</a>
+        <a href="manageBookings.jsp">Manage Bookings</a>
+        <a href="manageDrivers.jsp">Manage Drivers</a>
+        <a href="manageCars.jsp">Manage Cars</a>
+        <a href="logout" class="logout-btn">Logout</a>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="container">
             <h2>Manage Bookings</h2>
@@ -264,6 +227,7 @@
                         <th>Destination</th>
                         <th>Booking Date</th>
                         <th>Status</th>
+                        <th>Car</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -277,12 +241,13 @@
                         <td><%= booking.getDestination() %></td>
                         <td><%= booking.getBookingDate() %></td>
                         <td><%= booking.getStatus() %></td>
+                        <td><%= booking.getCarId() > 0 ? booking.getCarId() : "Not Assigned" %></td>
                         <td>
-                            <button class="btn btn-update" onclick="openUpdateBookingModal(<%= booking.getBookingId() %>, '<%= booking.getStatus() %>')">
-                                <i class="fas fa-pencil-alt"></i> <!-- Pencil icon -->
+                            <button class="btn btn-update" onclick="openUpdateBookingModal(<%= booking.getBookingId() %>)">
+                                <i class="fas fa-pencil-alt"></i>
                             </button>
                             <button class="btn btn-delete" onclick="deleteBooking(<%= booking.getBookingId() %>)">
-                                <i class="fas fa-trash-alt"></i> <!-- Bin icon -->
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>
                     </tr>
@@ -295,35 +260,87 @@
     <!-- Update Booking Modal -->
     <div id="updateBookingModal" class="modal">
         <div class="modal-content">
-            <h3>Update Booking Status</h3>
-            <form id="updateBookingForm" action="updateBooking" method="post">
+            <h3>Update Booking Details</h3>
+            <form id="updateBookingForm" action="updateBookingWithBill" method="post">
                 <input type="hidden" id="updateBookingId" name="bookingId">
-                <label for="updateStatus">Status:</label>
-                <select id="updateStatus" name="status" required>
-                    <option value="Pending">Pending</option>
-                    <option value="Confirmed">Confirmed</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
+                <label for="carId">Car:</label>
+                <select id="carId" name="carId" required>
+                    <%
+                        for (Car car : cars) {
+                            out.print("<option value='" + car.getCarId() + "'>" + car.getModel() + "</option>");
+                        }
+                    %>
                 </select>
+                <label for="totalAmount">Total Amount:</label>
+                <input type="number" id="totalAmount" name="totalAmount" required oninput="calculateFinalAmount()">
+                <label for="tax">Tax (%):</label>
+                <input type="number" id="tax" name="tax" required oninput="calculateFinalAmount()">
+                <label for="discount">Discount (%):</label>
+                <input type="number" id="discount" name="discount" required oninput="calculateFinalAmount()">
+                <label for="finalAmount">Final Amount:</label>
+                <input type="number" id="finalAmount" name="finalAmount" readonly>
                 <button type="submit">Update</button>
                 <button type="button" onclick="closeUpdateBookingModal()">Cancel</button>
             </form>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <p>&copy; 2025 Mega City Cab. All rights reserved.</p>
-        <p>Contact: info@megacitycab.com | Follow us: 
-            <a href="#" style="color: white;"><i class="fab fa-facebook"></i></a>
-            <a href="#" style="color: white;"><i class="fab fa-twitter"></i></a>
-            <a href="#" style="color: white;"><i class="fab fa-instagram"></i></a>
-        </p>
+        <p>Contact: info@megacitycab.com | Follow us:</p>
     </footer>
 
-    <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function openUpdateBookingModal(bookingId) {
+            document.getElementById("updateBookingId").value = bookingId;
+            fetchBillData(bookingId);
+            document.getElementById("updateBookingModal").style.display = "flex";
+        }
+
+        function closeUpdateBookingModal() {
+            document.getElementById("updateBookingModal").style.display = "none";
+        }
+
+        function deleteBooking(bookingId) {
+            if (confirm("Are you sure you want to delete this booking?")) {
+                fetch("deleteBooking?id=" + bookingId, { method: "POST" })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert("Failed to delete booking.");
+                        }
+                    });
+            }
+        }
+
+        function calculateFinalAmount() {
+            const totalAmount = parseFloat(document.getElementById("totalAmount").value) || 0;
+            const tax = parseFloat(document.getElementById("tax").value) || 0;
+            const discount = parseFloat(document.getElementById("discount").value) || 0;
+
+            const taxAmount = (totalAmount * tax) / 100;
+            const discountAmount = (totalAmount * discount) / 100;
+            const finalAmount = totalAmount + taxAmount - discountAmount;
+
+            document.getElementById("finalAmount").value = finalAmount.toFixed(2);
+        }
+
+        function fetchBillData(bookingId) {
+            fetch("getBill?bookingId=" + bookingId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("totalAmount").value = data.totalAmount || 0;
+                    document.getElementById("tax").value = data.tax || 0;
+                    document.getElementById("discount").value = data.discount || 0;
+                    document.getElementById("finalAmount").value = data.finalAmount || 0;
+                    document.getElementById("carId").value = data.carId || 0;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
 </body>
 </html>
