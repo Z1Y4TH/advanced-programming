@@ -22,6 +22,7 @@ public class Bill {
 
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
+        calculateFinalAmount();
     }
 
     public double getTax() {
@@ -30,6 +31,7 @@ public class Bill {
 
     public void setTax(double tax) {
         this.tax = tax;
+        calculateFinalAmount();
     }
 
     public double getDiscount() {
@@ -38,13 +40,14 @@ public class Bill {
 
     public void setDiscount(double discount) {
         this.discount = discount;
+        calculateFinalAmount();
     }
 
     public double getFinalAmount() {
         return finalAmount;
     }
 
-    public void setFinalAmount(double finalAmount) {
-        this.finalAmount = finalAmount;
+    private void calculateFinalAmount() {
+        this.finalAmount = totalAmount + (totalAmount * (tax / 100.0)) - (totalAmount * (discount / 100.0));
     }
 }

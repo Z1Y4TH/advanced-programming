@@ -18,7 +18,7 @@ public class BillDAO {
             stmt.setDouble(1, bill.getTotalAmount());
             stmt.setDouble(2, bill.getTax());
             stmt.setDouble(3, bill.getDiscount());
-            stmt.setDouble(4, bill.getFinalAmount());
+            stmt.setDouble(4, bill.getFinalAmount()); // This will be calculated from the bill object.
             stmt.setInt(5, bill.getBookingId());
             int rowsUpdated = stmt.executeUpdate();
 
@@ -29,7 +29,7 @@ public class BillDAO {
                     insertStmt.setDouble(2, bill.getTotalAmount());
                     insertStmt.setDouble(3, bill.getTax());
                     insertStmt.setDouble(4, bill.getDiscount());
-                    insertStmt.setDouble(5, bill.getFinalAmount());
+                    insertStmt.setDouble(5, bill.getFinalAmount()); // This will be calculated from the bill object.
                     insertStmt.executeUpdate();
                 }
             }
@@ -52,7 +52,6 @@ public class BillDAO {
                 bill.setTotalAmount(rs.getDouble("total_amount"));
                 bill.setTax(rs.getDouble("tax"));
                 bill.setDiscount(rs.getDouble("discount"));
-                bill.setFinalAmount(rs.getDouble("final_amount"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
