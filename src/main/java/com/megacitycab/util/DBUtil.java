@@ -9,6 +9,8 @@ public class DBUtil {
     private static final String USER = "postgres";
     private static final String PASSWORD = "nim#MBI&ccr";
 
+    private static Connection testConnection; // Add this
+
     static {
         try {
             // Explicitly load the PostgreSQL JDBC driver
@@ -19,6 +21,22 @@ public class DBUtil {
     }
 
     public static Connection getConnection() throws SQLException {
+        if (testConnection != null) { // Check if test connection is set
+            return testConnection;
+        }
         return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    public static void setTestConnection(Connection conn) { // Add this method
+        testConnection = conn;
+    }
+
+    public static void closeTestConnection() throws SQLException {
+        if(testConnection != null){
+            if(!testConnection.isClosed()){
+                testConnection.close();
+            }
+            testConnection = null;
+        }
     }
 }
